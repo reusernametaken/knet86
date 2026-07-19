@@ -26,6 +26,19 @@
   On THIS page (kNET):
     left peek  = MESH THAT DIVIDE  (previous in the loop)
     right peek = JUST GREENS       (next in the loop)
+
+  Peek cards are real partial previews of their destination page
+  (echo treatment), not text-only info cards. Left (MTD) uses a
+  slice of assets/mtd-header.jpg (same file as mtd.2203.fyi's own
+  flag). Right (GREENS) uses a slice of
+  assets/greens-icons-ghost.png plus live "Just Greens" text in
+  Lora, echoing greens.2203.fyi's own flag. Both files need to sit
+  in assets/ here too.
+
+  Nav arrows moved off this page's own flag and now live on the
+  peek cards, positioned at each card's INNER edge (facing center)
+  -- the margin between this page and whichever one you'd click
+  into.
   ============================================================
 -->
 
@@ -89,7 +102,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 64px;
+    padding: 0 24px;
     overflow: hidden;
   }
 
@@ -117,34 +130,6 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-shadow: 0 0 12px rgba(255,255,255,0.35);
-  }
-
-  .flag-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    background: none;
-    border: none;
-    padding: 8px;
-    color: var(--dim);
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: clamp(18px, 4.5vw, 28px);
-    letter-spacing: 0.05em;
-    text-shadow: 0 0 12px rgba(255,255,255,0.35);
-    cursor: pointer;
-    line-height: 1;
-    text-decoration: none;
-    display: inline-block;
-  }
-  /* pushed to the true outer edge of the banner */
-  .flag-arrow--prev { left: 2px; }
-  .flag-arrow--next { right: 2px; }
-  .flag-arrow:hover,
-  .flag-arrow:focus-visible {
-    color: var(--glow);
-    text-shadow: 0 0 16px rgba(79,209,255,0.6);
   }
 
   .cursor {
@@ -269,7 +254,33 @@
     max-width: 220px;
     display: flex;
     align-items: center;
+    position: relative;
   }
+
+  .peek-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    background: none;
+    border: none;
+    padding: 4px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(15px, 3vw, 20px);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-block;
+    color: var(--dim);
+  }
+  .peek-arrow:hover,
+  .peek-arrow:focus-visible {
+    color: var(--glow);
+  }
+  .peek--left .peek-arrow { right: 8px; }
+  .peek--right .peek-arrow { left: 8px; }
 
   .peek-card {
     width: 100%;
@@ -286,6 +297,7 @@
     opacity: 0.6;
     cursor: pointer;
     transition: opacity 0.15s ease;
+    overflow: hidden;
   }
   .peek-card:hover,
   .peek-card:focus-visible {
@@ -307,6 +319,53 @@
     font-size: 12px;
     color: var(--dim);
   }
+
+  /* ---------- echo cards: a genuine partial preview of the destination page ---------- */
+  .peek-card--echo { padding: 0; justify-content: flex-start; }
+  .peek-echo-img { height: 64px; flex-shrink: 0; }
+  .peek-echo-body { flex: 1 1 auto; padding: 14px 12px; display: flex; flex-direction: column; justify-content: flex-end; }
+
+  /* destination: mesh that divide */
+  .peek-echo-img--mtd {
+    background-image: url('assets/mtd-header.jpg');
+    background-size: cover;
+    background-position: left center;
+  }
+  .peek-echo-body--mtd { background: #ede4c5; }
+  .peek-echo-body--mtd .peek-eyebrow { color: #8a7f5f; }
+  .peek-echo-body--mtd h3 { color: #2a2416; }
+  .peek-echo-body--mtd p { color: #6b6350; }
+
+  /* destination: just greens -- ghosted icons + live serif wordmark, same as the real page */
+  .peek-echo-img--greens {
+    position: relative;
+    background: #ffffff;
+  }
+  .peek-echo-img--greens img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left center;
+    opacity: 0.55;
+  }
+  .peek-echo-img--greens span {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #201c16;
+  }
+  .peek-echo-body--greens { background: #ffffff; }
+  .peek-echo-body--greens .peek-eyebrow { color: #8a8a8a; }
+  .peek-echo-body--greens h3 { color: #1a1a1a; }
+  .peek-echo-body--greens p { color: #6b7280; }
 
   main.center-frame {
     flex: 1 1 auto;
@@ -366,20 +425,22 @@
 <div class="page-shell">
 
   <div class="frameset-track">
-      <aside class="peek">
-        <a class="peek-card" href="https://mtd.2203.fyi/" style="--peek-accent:#c9812f">
-          <span class="peek-eyebrow">PREV</span>
-          <h3>MESH THAT DIVIDE</h3>
-          <p>community Meshtastic network</p>
+      <aside class="peek peek--left">
+        <a class="peek-arrow" href="https://mtd.2203.fyi/" aria-label="Previous: Mesh That Divide" title="#^÷meshTHATdivide🏔️">[ &rsaquo; ]</a>
+        <a class="peek-card peek-card--echo" href="https://mtd.2203.fyi/" style="--peek-accent:#c9812f">
+          <div class="peek-echo-img peek-echo-img--mtd"></div>
+          <div class="peek-echo-body peek-echo-body--mtd">
+            <span class="peek-eyebrow">PREV</span>
+            <h3>MESH THAT DIVIDE</h3>
+            <p>community Meshtastic network</p>
+          </div>
         </a>
       </aside>
 
       <main class="center-frame">
 
         <div class="flag">
-          <a class="flag-arrow flag-arrow--prev" href="https://mtd.2203.fyi/" aria-label="Previous: Mesh That Divide" title="#^÷meshTHATdivide🏔️">[ &rsaquo; ]</a>
           <h1>kNET<span class="cursor">&nbsp;</span></h1>
-          <a class="flag-arrow flag-arrow--next" href="https://greens.2203.fyi/" aria-label="Next: Just Greens" title="Just Greens🌱">[ &lsaquo; ]</a>
         </div>
 
         <p class="prompt"><span>$</span> node --status active // 86.2203.fyi</p>
@@ -423,12 +484,19 @@
 
       </main>
 
-      <aside class="peek">
-        <a class="peek-card" href="https://greens.2203.fyi/" style="--peek-accent:#2f9e44">
-          <span class="peek-eyebrow">NEXT</span>
-          <h3>JUST GREENS</h3>
-          <p>nonprofit produce, window grow array</p>
+      <aside class="peek peek--right">
+        <a class="peek-card peek-card--echo" href="https://greens.2203.fyi/" style="--peek-accent:#2f9e44">
+          <div class="peek-echo-img peek-echo-img--greens">
+            <img src="assets/greens-icons-ghost.png" alt="">
+            <span>Just Greens</span>
+          </div>
+          <div class="peek-echo-body peek-echo-body--greens">
+            <span class="peek-eyebrow">NEXT</span>
+            <h3>JUST GREENS</h3>
+            <p>nonprofit produce, window grow array</p>
+          </div>
         </a>
+        <a class="peek-arrow" href="https://greens.2203.fyi/" aria-label="Next: Just Greens" title="Just Greens🌱">[ &lsaquo; ]</a>
       </aside>
   </div>
 
