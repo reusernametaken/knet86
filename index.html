@@ -253,13 +253,13 @@
     min-width: 0;
     max-width: 220px;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     position: relative;
   }
 
   .peek-arrow {
     position: absolute;
-    top: 50%;
+    top: 100px;
     transform: translateY(-50%);
     z-index: 3;
     background: none;
@@ -282,98 +282,73 @@
   .peek--left .peek-arrow { right: 8px; }
   .peek--right .peek-arrow { left: 8px; }
 
-  .peek-card {
+  /* ---------- frame: a duplicated partial view of the neighboring
+     page's header graphic, true scale (200px, matching kNET's own
+     flag height), plus a flat color-coded block standing in for its
+     body. No text -- just the graphic, the color, and the arrow. ---------- */
+  .frame {
     width: 100%;
-    min-height: 150px;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    border: 1px solid var(--rule);
-    border-top: 3px solid var(--peek-accent, var(--blue));
-    background: var(--panel);
-    padding: 14px 12px;
     text-decoration: none;
-    color: inherit;
     opacity: 0.6;
     cursor: pointer;
     transition: opacity 0.15s ease;
     overflow: hidden;
+    border: 1px solid var(--rule);
   }
-  .peek-card:hover,
-  .peek-card:focus-visible {
+  .frame:hover,
+  .frame:focus-visible {
     opacity: 1;
   }
-  .peek-eyebrow {
-    display: block;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--dim);
-  }
-  .peek-card h3 {
-    margin: 4px 0 6px;
-    font-size: 14px;
-    color: var(--white);
-  }
-  .peek-card p {
-    margin: 0;
-    font-size: 12px;
-    color: var(--dim);
-  }
+  .frame-header { height: 200px; flex-shrink: 0; }
+  .frame-body { flex: 1 1 auto; }
 
-  /* ---------- echo cards: a genuine partial preview of the destination page ---------- */
-  .peek-card--echo { padding: 0; justify-content: flex-start; }
-  .peek-echo-img { height: 64px; flex-shrink: 0; }
-  .peek-echo-body { flex: 1 1 auto; padding: 14px 12px; display: flex; flex-direction: column; justify-content: flex-end; }
-
-  /* destination: mesh that divide -- this is a LEFT-side peek, so we show
-     the TRAILING edge of its header (as if the rest continues further
-     left, off-screen) -- zoomed in hard, not fit-to-box */
-  .peek-echo-img--mtd {
+  /* destination: mesh that divide -- LEFT-side frame, so we show the
+     edge of its header closest to kNET (its right/trailing edge) --
+     true scale matching mtd.2203.fyi's own flag */
+  .frame-header--mtd {
     background-image: url('assets/mtd-header.jpg');
-    background-size: 1600px auto;
-    background-position: -1194px center;
+    background-size: auto 200px;
+    background-position: right center;
     background-repeat: no-repeat;
   }
-  .peek-echo-body--mtd { background: #ede4c5; }
-  .peek-echo-body--mtd .peek-eyebrow { color: #8a7f5f; }
-  .peek-echo-body--mtd h3 { color: #2a2416; }
-  .peek-echo-body--mtd p { color: #6b6350; }
+  .frame-body--mtd { background: #ede4c5; }
 
-  /* destination: just greens -- this is a RIGHT-side peek, so we show
-     the LEADING edge of its header -- zoomed in hard, not fit-to-box */
-  .peek-echo-img--greens {
+  /* destination: just greens -- RIGHT-side frame, so we show the edge
+     of its header closest to kNET (its left/leading edge) -- true
+     scale matching greens.2203.fyi's own flag */
+  .frame-header--greens {
     position: relative;
     background-color: #ffffff;
     background-image: url('assets/greens-icons-ghost.png');
-    background-size: 1500px auto;
+    background-size: auto 200px;
     background-position: left center;
     background-repeat: no-repeat;
   }
-  .peek-echo-img--greens::before {
+  .frame-header--greens::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.34);
   }
-  .peek-echo-img--greens span {
+  .frame-header--greens span {
     position: absolute;
     inset: 0;
     z-index: 1;
     display: flex;
     align-items: center;
     overflow: hidden;
-    padding-left: 8px;
+    padding-left: 24px;
     font-family: 'Lora', Georgia, 'Times New Roman', serif;
     font-weight: 600;
-    font-size: 175px;
+    font-size: 72px;
     line-height: 1;
     white-space: nowrap;
     color: #201c16;
   }
-  .peek-echo-body--greens { background: #ffffff; }
-  .peek-echo-body--greens .peek-eyebrow { color: #8a8a8a; }
-  .peek-echo-body--greens h3 { color: #1a1a1a; }
-  .peek-echo-body--greens p { color: #6b7280; }
+  .frame-body--greens { background: #ffffff; }
 
   main.center-frame {
     flex: 1 1 auto;
@@ -436,13 +411,9 @@
   <div class="frameset-track">
       <aside class="peek peek--left">
         <a class="peek-arrow" href="https://mtd.2203.fyi/" aria-label="Previous: Mesh That Divide" title="#^÷meshTHATdivide🏔️">[ &rsaquo; ]</a>
-        <a class="peek-card peek-card--echo" href="https://mtd.2203.fyi/" style="--peek-accent:#c9812f">
-          <div class="peek-echo-img peek-echo-img--mtd"></div>
-          <div class="peek-echo-body peek-echo-body--mtd">
-            <span class="peek-eyebrow">PREV</span>
-            <h3>MESH THAT DIVIDE</h3>
-            <p>community Meshtastic network</p>
-          </div>
+        <a class="frame" href="https://mtd.2203.fyi/" aria-label="Previous: Mesh That Divide">
+          <div class="frame-header frame-header--mtd"></div>
+          <div class="frame-body frame-body--mtd"></div>
         </a>
       </aside>
 
@@ -494,15 +465,9 @@
       </main>
 
       <aside class="peek peek--right">
-        <a class="peek-card peek-card--echo" href="https://greens.2203.fyi/" style="--peek-accent:#2f9e44">
-          <div class="peek-echo-img peek-echo-img--greens">
-            <span>Just Greens</span>
-          </div>
-          <div class="peek-echo-body peek-echo-body--greens">
-            <span class="peek-eyebrow">NEXT</span>
-            <h3>JUST GREENS</h3>
-            <p>nonprofit produce, window grow array</p>
-          </div>
+        <a class="frame" href="https://greens.2203.fyi/" aria-label="Next: Just Greens">
+          <div class="frame-header frame-header--greens"><span>Just Greens</span></div>
+          <div class="frame-body frame-body--greens"></div>
         </a>
         <a class="peek-arrow" href="https://greens.2203.fyi/" aria-label="Next: Just Greens" title="Just Greens🌱">[ &lsaquo; ]</a>
       </aside>
