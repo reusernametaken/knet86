@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2203.fyi // kNET</title>
+<meta name="description" content="kNET node -- tools, projects, and works in progress.">
+
+<!--
+  ============================================================
+  86.2203.fyi -- kNET page. Save this file as index.html inside
+  the 86 subdomain's web root.
+
+  This is one of three standalone subdomain pages (86 / mtd /
+  greens). Each is a fully separate HTML file -- no shared JS
+  state, no cross-page fetching. They just happen to reuse the
+  same frame markup/CSS/script pattern so they look and behave
+  identically. Clicking an arrow or a side peek card is a plain
+  <a href> to a different subdomain -- a real page load, not a
+  live carousel. That's deliberate: nobody has to load all three
+  pages just to look at one.
+
+  The three pages form a fixed loop:
+    KNET (86)  -->  MESH THAT DIVIDE (mtd)  -->  JUST GREENS (greens)  --> back to KNET
+
+  On THIS page (kNET):
+    left peek  = MESH THAT DIVIDE  (previous in the loop)
+    right peek = JUST GREENS       (next in the loop)
+  ============================================================
+-->
+
+<style>
+  :root {
+    --bg:        #050607;
+    --panel:     #0b0d10;
+    --blue:      #1c3fd9;
+    --blue-deep: #0a154d;
+    --ink:       #e8e8e8;
+    --white:     #ffffff;
+    --dim:       #6b7280;
+    --glow:      #4fd1ff;
+    --rule:      #22262c;
+    --mono: 'Courier New', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    --flag-accent: var(--blue);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px 64px;
+  }
+
+  .page-shell {
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.025) 0px,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    z-index: 999;
+  }
+
+  /* ---------- flag banner: shared frame element ---------- */
+  .flag {
+    position: relative;
+    height: 200px;
+    background: linear-gradient(135deg, #000 49.6%, var(--flag-accent) 50.4%);
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 64px;
+    overflow: hidden;
+  }
+
+  .flag::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(79,209,255,0.08) 50%, transparent 100%);
+    background-size: 100% 300%;
+    animation: sweep 6s linear infinite;
+  }
+
+  @keyframes sweep {
+    0%   { background-position: 0 0%; }
+    100% { background-position: 0 300%; }
+  }
+
+  .flag h1 {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    text-align: center;
+    color: var(--white);
+    font-size: clamp(28px, 8vw, 44px);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 12px rgba(255,255,255,0.35);
+  }
+
+  .flag-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    background: none;
+    border: none;
+    padding: 8px;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(18px, 4.5vw, 28px);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 12px rgba(255,255,255,0.35);
+    cursor: pointer;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-block;
+  }
+  /* pushed to the true outer edge of the banner */
+  .flag-arrow--prev { left: 2px; }
+  .flag-arrow--next { right: 2px; }
+  .flag-arrow:hover,
+  .flag-arrow:focus-visible {
+    color: var(--glow);
+    text-shadow: 0 0 16px rgba(79,209,255,0.6);
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.5em;
+    margin-left: 2px;
+    background: var(--white);
+    animation: blink 1.1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  .prompt {
+    margin: 18px 0 0;
+    font-size: 14px;
+    color: var(--dim);
+  }
+  .prompt span { color: var(--glow); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 24px 0;
+  }
+
+  nav.menu {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+  nav.menu a {
+    color: var(--ink);
+    text-decoration: none;
+    border: 1px solid var(--rule);
+    padding: 4px 10px;
+  }
+  nav.menu a:hover,
+  nav.menu a:focus-visible {
+    color: var(--bg);
+    background: var(--glow);
+    border-color: var(--glow);
+  }
+
+  section {
+    margin-top: 32px;
+  }
+  section h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin: 0 0 10px;
+    letter-spacing: 0.04em;
+  }
+  section h2::before {
+    content: "> ";
+    color: var(--blue);
+  }
+  ul.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ul.list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  ul.list li:last-child { border-bottom: none; }
+  ul.list a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  ul.list a:hover,
+  ul.list a:focus-visible {
+    color: var(--glow);
+    text-decoration: underline;
+  }
+  .desc {
+    color: var(--dim);
+    font-size: 13px;
+  }
+
+  .soon-tag {
+    color: var(--blue);
+    font-size: 12px;
+    border: 1px solid var(--blue-deep);
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  #soon li { color: var(--dim); }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ---------- side peek cards: static labels, real page loads on click ---------- */
+  .frameset-track {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .peek {
+    flex: 1 1 180px;
+    min-width: 0;
+    max-width: 220px;
+    display: flex;
+    align-items: center;
+  }
+
+  .peek-card {
+    width: 100%;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--peek-accent, var(--blue));
+    background: var(--panel);
+    padding: 14px 12px;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .peek-card:hover,
+  .peek-card:focus-visible {
+    opacity: 1;
+  }
+  .peek-eyebrow {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+  }
+  .peek-card h3 {
+    margin: 4px 0 6px;
+    font-size: 14px;
+    color: var(--white);
+  }
+  .peek-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  main.center-frame {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 640px;
+  }
+
+  /* ---------- page strip: all three subdomains, current one highlighted ---------- */
+  .page-strip {
+    margin-top: 18px;
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    align-items: baseline;
+  }
+  .page-strip .stop {
+    font-size: 12px;
+    color: var(--dim);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+  }
+  .page-strip .stop.is-active {
+    color: var(--glow);
+    border-bottom-color: var(--glow);
+  }
+
+  @media (max-width: 860px) {
+    .frameset-track {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      justify-content: flex-start;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .frameset-track::-webkit-scrollbar { display: none; }
+
+    .peek {
+      scroll-snap-align: center;
+      flex: 0 0 80vw;
+      max-width: none;
+    }
+    main.center-frame {
+      scroll-snap-align: center;
+      flex: 0 0 88vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flag::after, .cursor { animation: none; }
+  }
+</style>
+</head>
+
+<body>
+<div class="page-shell">
+
+  <div class="frameset-track">
+      <aside class="peek">
+        <a class="peek-card" href="https://mtd.2203.fyi/" style="--peek-accent:#c9812f">
+          <span class="peek-eyebrow">PREV</span>
+          <h3>MESH THAT DIVIDE</h3>
+          <p>community Meshtastic network</p>
+        </a>
+      </aside>
+
+      <main class="center-frame">
+
+        <div class="flag">
+          <a class="flag-arrow flag-arrow--prev" href="https://mtd.2203.fyi/" aria-label="Previous: Mesh That Divide" title="#^÷meshTHATdivide🏔️">[ &rsaquo; ]</a>
+          <h1>kNET<span class="cursor">&nbsp;</span></h1>
+          <a class="flag-arrow flag-arrow--next" href="https://greens.2203.fyi/" aria-label="Next: Just Greens" title="Just Greens🌱">[ &lsaquo; ]</a>
+        </div>
+
+        <p class="prompt"><span>$</span> node --status active // 86.2203.fyi</p>
+
+        <hr>
+
+        <nav class="menu">
+          <a href="#tools">[ TOOLS ]</a>
+          <a href="#projects">[ PROJECTS ]</a>
+          <a href="#soon">[ SOON ]</a>
+        </nav>
+
+        <section id="tools">
+          <h2>critical tools / downloads</h2>
+          <ul class="list">
+            <li><a href="#">rayhunter-watch.py</a><span class="desc">polling script</span></li>
+            <li><a href="#">kNET config</a><span class="desc">network notes</span></li>
+            <li><a href="#">placeholder item</a><span class="desc">replace me</span></li>
+          </ul>
+        </section>
+
+        <section id="projects">
+          <h2>other projects</h2>
+          <ul class="list">
+            <li><a href="#">project one</a><span class="desc">short tag</span></li>
+            <li><a href="#">project two</a><span class="desc">short tag</span></li>
+          </ul>
+        </section>
+
+        <section id="soon">
+          <h2>coming soon</h2>
+          <ul class="list">
+            <li>file drive <span class="soon-tag">soon</span></li>
+          </ul>
+        </section>
+
+        <footer>
+          <span>kNET // 86.2203.fyi</span>
+          <span>last updated: --</span>
+        </footer>
+
+      </main>
+
+      <aside class="peek">
+        <a class="peek-card" href="https://greens.2203.fyi/" style="--peek-accent:#2f9e44">
+          <span class="peek-eyebrow">NEXT</span>
+          <h3>JUST GREENS</h3>
+          <p>nonprofit produce, window grow array</p>
+        </a>
+      </aside>
+  </div>
+
+  <nav class="page-strip">
+    <a class="stop is-active" href="https://86.2203.fyi/">KNET</a>
+    <a class="stop" href="https://mtd.2203.fyi/">MESH THAT DIVIDE</a>
+    <a class="stop" href="https://greens.2203.fyi/">JUST GREENS</a>
+  </nav>
+
+</div>
+</body>
+</html>
