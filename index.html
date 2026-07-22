@@ -12,11 +12,18 @@
   Plain HTML/CSS/vanilla JS, single file, no external dependencies.
   Structure:
     1. .flag                -- diagonal banner + wordmark (with node
-                                status LEDs) + subtitle + prev/next
-                                arrows, built at wordmark scale. This
-                                is the reusable per-page "frame" --
-                                same block goes on every sibling page,
-                                just swap the accent color + wordmark.
+                                status LEDs) + subtitle, built at
+                                wordmark scale. This is the reusable
+                                per-page "frame" -- same block goes on
+                                every sibling page, just swap the
+                                accent color + wordmark. No prev/next
+                                arrows anymore -- removed entirely
+                                (HTML, CSS, and the JS that drove
+                                them), matching the call mtd.2203.fyi
+                                and greens.2203.fyi already made on
+                                their own rebuilds: the page-strip (3)
+                                already links to every neighbor, the
+                                arrows were redundant chrome.
                                 Bisection lives on .flag-emblem, a
                                 300x200 (3:2) patch centered on the
                                 banner rather than stretched across its
@@ -36,11 +43,11 @@
                                 .flag itself is solid black outside it.
                                 .flag-stars is a JS-scattered field of
                                 .star dots layered under both the
-                                emblem (z-index:1) and the wordmark/
-                                arrows (z-index:2) at z-index:0 --
-                                closer to the viewer than the stars,
-                                which only show through .flag's black
-                                field around the emblem, not across its
+                                emblem (z-index:1) and the wordmark
+                                (z-index:2) at z-index:0 -- closer to
+                                the viewer than the stars, which only
+                                show through .flag's black field
+                                around the emblem, not across its
                                 face -- rotating one full turn per
                                 sidereal day. See the CSS and script
                                 for all three layers.
@@ -59,21 +66,20 @@
                                 and starTurn animation as .flag-stars,
                                 just at a density-matched, dynamically-
                                 sized count -- see scatterStars() in
-                                the script.
+                                the script. Its own top offset is tied
+                                to body's padding-top (see body below)
+                                since it has no positioned ancestor of
+                                its own to inherit that shift from.
     1a. .mesh-banner         -- Mesh That Divide promo button, pinned
                                  in the white margin just left of the
                                  flag, vertically centered on it, same
                                  as 1b. Links to https://mtd.2203.fyi/.
-                                 Hover state is linked with the
-                                 adjacent (prev) arrow, both ways.
                                  Cream background preserved as-is, no
                                  whitening, unlike 1b.
     1b. .margin-banner       -- Just Greens promo button, pinned in the
                                  white margin just right of the flag,
                                  vertically centered on it. Links to
-                                 https://greens.2203.fyi/. Hover state
-                                 is linked with the adjacent (next)
-                                 arrow, both ways.
+                                 https://greens.2203.fyi/.
     2. .statusbar             -- bracket nav: SHARE / EQUIP / EMPOWER /
                                  RECLAIM / EXPECT. Not anchor-scroll
                                  links -- each is a button that flies
@@ -119,24 +125,31 @@
                                  default on load.
     3. .page-strip            -- horizontal scrub strip of every page on
                                  the site, lives INSIDE the frame as its
-                                 footer -- not trailing below it
+                                 footer -- not trailing below it. The
+                                 only carousel nav now that the arrows
+                                 are gone; it already links to every
+                                 neighbor.
     4. main.center-frame     -- the single 640px dark panel wrapping all
                                  of the above, floating on the black
-                                 page, touching the browser's top/bottom
-                                 edge. No content trails below it -- the
-                                 page-strip (3) is its last child. Side
-                                 margins left/right of it stay blank
-                                 except for the mesh-banner (1a),
+                                 page. body's own padding (20px top,
+                                 16px sides, 64px bottom -- matching
+                                 mtd.2203.fyi and greens.2203.fyi's own
+                                 body rule exactly, both landed on the
+                                 same value independently) keeps it
+                                 clear of the browser's actual edges,
+                                 rather than touching them directly.
+                                 Side margins left/right of it stay
+                                 blank except for the mesh-banner (1a),
                                  margin-banner (1b), and whichever
                                  side-menu (2b) is open.
-    5. <script>              -- PAGES config + arrow nav + strip
-                                 rendering + side-menu toggle logic +
-                                 center-content swap logic
+    5. <script>              -- PAGES config + strip rendering +
+                                 side-menu toggle logic + center-content
+                                 swap logic
 
   Swap the placeholder <li> items and hrefs for real links, and flesh
   out STUBS with real copy as pages get written.
   To add/remove/reorder sibling pages, edit the PAGES array near the
-  bottom -- everything else (arrows, strip) derives from it.
+  bottom -- everything else (the strip) derives from it.
   ============================================================
 -->
 
@@ -170,10 +183,18 @@
     font-family: var(--mono);
   }
 
+  /* 20px 16px 64px -- not picked in isolation. mtd.2203.fyi and
+     greens.2203.fyi's own rebuilds each independently landed on this
+     exact value for their own body padding; k-NET had padding:0 here
+     and was the odd one out, sitting flush against the browser's
+     real top edge while its siblings had breathing room. Matching it
+     exactly (not just adding a top value) is what makes all three
+     actually align rather than each doing its own approximation. */
   body {
     display: flex;
-    justify-content: center;
-    padding: 0;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 64px;
   }
 
   .page-shell {
@@ -254,10 +275,10 @@
        emblem is the flag itself, closer to the viewer than the stars
        behind it; stars should only show through .flag's black field
        around the emblem, not sprinkle across the emblem's own face.
-       Distinct from the wordmark/arrows' own z-index:2 on purpose --
-       three clear layers (stars 0, emblem 1, wordmark/arrows 2)
-       rather than tying the emblem to the text layer and leaning on
-       DOM order to break the tie. */
+       Distinct from the wordmark's own z-index:2 on purpose -- three
+       clear layers (stars 0, emblem 1, wordmark 2) rather than tying
+       the emblem to the text layer and leaning on DOM order to break
+       the tie. */
     z-index: 1;
   }
 
@@ -305,7 +326,13 @@
      to contain the rotation's sweep. */
   .top-stars {
     position: absolute;
-    top: 0;
+    /* Matches body's own padding-top (20px) below -- .top-stars has
+       no positioned ancestor, so its containing block is the initial
+       containing block (the viewport), completely unaware of body's
+       own padding box. Without this offset, body's padding would
+       push the flag down 20px while the star band stayed at the
+       true page top, drifting the two out of alignment. */
+    top: 20px;
     left: 0;
     width: 100%;
     height: 200px;
@@ -329,8 +356,8 @@
     letter-spacing: 0.12em;
     text-shadow: 0 0 12px rgba(255,255,255,0.35);
     /* room is reserved by .flag's own padding, not by flex-basis --
-       so bigger emblems (images, wider marks) on sibling pages get the
-       full available width instead of being squeezed by arrow siblings */
+       so bigger emblems (images, wider marks) on sibling pages get
+       the full available width to work with */
   }
 
   /* The k-NET wordmark itself is a real link to 86.2203.fyi, but a
@@ -394,45 +421,6 @@
     text-shadow: 0 0 8px rgba(255,255,255,0.25);
   }
 
-  .flag-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    background: none;
-    border: none;
-    padding: 8px;
-    color: var(--slate);
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: clamp(18px, 4.5vw, 28px);
-    letter-spacing: 0.05em;
-    text-shadow: 0 0 12px rgba(112,128,144,0.45);
-    cursor: pointer;
-    line-height: 1;
-  }
-  .flag-arrow--prev { left: 8px; }
-  .flag-arrow--next { right: 8px; }
-  .flag-arrow:hover:not(:disabled),
-  .flag-arrow:focus-visible:not(:disabled),
-  /* Just Greens sits immediately right of the flag, so the "next"
-     arrow is its adjacent control -- hovering the Just Greens button
-     lights up this arrow too, as if you were hovering it directly.
-     Mesh That Divide sits immediately left, paired the same way with
-     the "prev" arrow. */
-  .flag-wrap:has(.margin-banner:hover) .flag-arrow--next:not(:disabled),
-  .flag-wrap:has(.margin-banner:focus-visible) .flag-arrow--next:not(:disabled),
-  .flag-wrap:has(.mesh-banner:hover) .flag-arrow--prev:not(:disabled),
-  .flag-wrap:has(.mesh-banner:focus-visible) .flag-arrow--prev:not(:disabled) {
-    color: var(--glow);
-    text-shadow: 0 0 16px rgba(79,209,255,0.6);
-  }
-  .flag-arrow:disabled {
-    color: rgba(112,128,144,0.3);
-    text-shadow: none;
-    cursor: default;
-  }
-
   .cursor {
     display: inline-block;
     width: 0.5em;
@@ -452,13 +440,10 @@
   }
 
   /* Just Greens margin banner -- sits in the margin just right of the
-     flag, vertically centered on the flag (which is also where the
-     prev/next arrows sit, since they use the same top:50% centering).
-     Real link -> https://greens.2203.fyi/. Zero internal padding: the
-     image is cropped tight to the circle artwork, so the border
-     touches the graphics directly with no gap. Hover state is linked
-     both ways with the adjacent (next) arrow -- see the :has() rules
-     on .flag-arrow and here. */
+     flag, vertically centered on it via top:50%. Real link ->
+     https://greens.2203.fyi/. Zero internal padding: the image is
+     cropped tight to the circle artwork, so the border touches the
+     graphics directly with no gap. */
   .margin-banner {
     position: absolute;
     left: calc(100% + 14px);
@@ -484,11 +469,7 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   }
   .margin-banner:hover,
-  .margin-banner:focus-visible,
-  /* the reverse of the arrow rule above: hovering the adjacent next
-     arrow makes the Just Greens button react as if hovered directly */
-  .flag-wrap:has(.flag-arrow--next:hover) .margin-banner,
-  .flag-wrap:has(.flag-arrow--next:focus-visible) .margin-banner {
+  .margin-banner:focus-visible {
     border-color: var(--glow);
     box-shadow: 0 4px 16px rgba(79,209,255,0.45);
     transform: translateY(calc(-50% - 2px));
@@ -522,15 +503,14 @@
   }
 
   /* Mesh That Divide banner button -- the left-margin twin to
-     .margin-banner. Same width, same border/shadow/hover treatment,
-     same reciprocal hover-link, this time with the adjacent PREV
-     arrow (Mesh sits to k-NET's left in the PAGES order). Deliberately
-     top-anchored rather than vertically centered like Just Greens --
-     that leaves the flag's lower-left margin free for the side-menus
-     (which are bottom-anchored, see .side-menu below) instead of the
-     two competing for the same vertical space. No fade animation on
-     the image, unlike Just Greens -- this one carries a tagline that
-     needs to stay legible, not pulse in and out. */
+     .margin-banner. Same width, same border/shadow/hover treatment.
+     Deliberately top-anchored rather than vertically centered like
+     Just Greens -- that leaves the flag's lower-left margin free for
+     the side-menus (which are bottom-anchored, see .side-menu below)
+     instead of the two competing for the same vertical space. No
+     fade animation on the image, unlike Just Greens -- this one
+     carries a tagline that needs to stay legible, not pulse in and
+     out. */
   .mesh-banner {
     position: absolute;
     right: calc(100% + 14px);
@@ -547,9 +527,7 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   }
   .mesh-banner:hover,
-  .mesh-banner:focus-visible,
-  .flag-wrap:has(.flag-arrow--prev:hover) .mesh-banner,
-  .flag-wrap:has(.flag-arrow--prev:focus-visible) .mesh-banner {
+  .mesh-banner:focus-visible {
     border-color: var(--glow);
     box-shadow: 0 4px 16px rgba(79,209,255,0.45);
     transform: translateY(calc(-50% - 2px));
@@ -782,10 +760,8 @@
           <div class="flag" id="flagFrame">
             <div class="flag-emblem" aria-hidden="true"></div>
             <div class="flag-stars" id="flagStars" aria-hidden="true"></div>
-            <button class="flag-arrow flag-arrow--prev" id="prevArrow" title="mtd.2203.fyi" aria-label="Previous page">[ &lsaquo; ]</button>
             <h1><span class="node-leds" title="mesh node status — placeholder, not yet wired"><span class="led led--green"></span><span class="led led--red led--on"></span></span><a class="wordmark-link" href="https://86.2203.fyi/" title="86.2203.fyi">k-NET</a><span class="cursor">&nbsp;</span></h1>
             <p class="flag-subtitle">&lsquo;Eighty-six&rsquo; the gatekeeper</p>
-            <button class="flag-arrow flag-arrow--next" id="nextArrow" title="greens.2203.fyi" aria-label="Next page">[ &rsaquo; ]</button>
           </div>
 
           <a class="mesh-banner" href="https://mtd.2203.fyi/" title="mtd.2203.fyi" aria-label="Mesh That Divide -- visit site">
@@ -865,9 +841,9 @@
 (function () {
   // ---- every page on the site, in the order they appear on the strip.
   // theme  = flag accent color for that page + strip highlight
-  // live   = false means no click-through (arrows skip past it)
+  // live   = false means no click-through in the strip
   // EDIT THIS ARRAY to add/remove/reorder pages -- everything below
-  // (arrows, strip) is derived from it automatically.
+  // (the strip) is derived from it automatically.
   //
   // Every value below is sourced directly from this chat -- nothing
   // fabricated, nothing carried over from anywhere else.
@@ -935,27 +911,6 @@
     var topCount = Math.round(density * topStarsEl.clientWidth * topStarsEl.clientHeight);
     scatterStars(topStarsSpinEl, topCount);
   }
-
-  function wrap(i) { return (i + PAGES.length) % PAGES.length; }
-
-  function nearestLive(fromIndex, dir) {
-    for (var step = 1; step <= PAGES.length; step++) {
-      var p = PAGES[wrap(fromIndex + dir * step)];
-      if (p.live) return p;
-    }
-    return null;
-  }
-
-  var prevArrow = document.getElementById('prevArrow');
-  var nextArrow = document.getElementById('nextArrow');
-  var prevTarget = nearestLive(idx, -1);
-  var nextTarget = nearestLive(idx, 1);
-
-  if (prevTarget) prevArrow.addEventListener('click', function () { location.href = prevTarget.href; });
-  else prevArrow.disabled = true;
-
-  if (nextTarget) nextArrow.addEventListener('click', function () { location.href = nextTarget.href; });
-  else nextArrow.disabled = true;
 
   var strip = document.getElementById('pageStrip');
   PAGES.forEach(function (p) {
