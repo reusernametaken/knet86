@@ -446,7 +446,10 @@
      graphics directly with no gap. */
   .margin-banner {
     position: absolute;
-    left: calc(100% + 14px);
+    /* 20px gap on the opposite side -- matches .mesh-banner above
+       and the .carousel-row { gap: 20px } used by greens.2203.fyi
+       and mtd.2203.fyi. See the note on .mesh-banner. */
+    left: calc(100% + 20px);
     top: 50%;
     transform: translateY(-50%);
     width: 214px;
@@ -513,7 +516,13 @@
      out. */
   .mesh-banner {
     position: absolute;
-    right: calc(100% + 14px);
+    /* 20px gap between the peek-card's right edge and .flag-wrap's
+       left edge. Aligned with greens.2203.fyi and mtd.2203.fyi's
+       .carousel-row { gap: 20px } so all three sibling files put
+       their peek-cards the same distance from their flag columns --
+       clicking between siblings in the scrubber no longer shifts the
+       banners left or right on the frame boundary. */
+    right: calc(100% + 20px);
     top: 50%;
     transform: translateY(-50%);
     width: 214px;
@@ -740,6 +749,87 @@
   }
   .page-strip .stop.is-soon {
     color: #3a3f47;
+  }
+
+  /* ---------- mobile layout (rev 2, per shared 2203.fyi convention):
+     the peek cards (Mesh That Divide left / Just Greens right) and
+     any open side-menu need repositioning when the viewport can no
+     longer flank the 640px shell with 214px + 20px on each side.
+     Breakpoint 1108px = 640 + 20 + 214 + 214 + 20, matched exactly
+     with greens.2203.fyi and mtd.2203.fyi's own .carousel-row
+     breakpoint so all three sibling files switch to mobile mode at
+     the same viewport width.
+
+     Anchor plumbing: on desktop, .flag-wrap is the positioning
+     context (its position:relative lets .mesh-banner, .margin-banner,
+     and every .side-menu land against the flag). On mobile, that
+     stops working -- the flag stays at its usual top position, but
+     the peek cards need to sit at the very bottom of the center
+     panel, and any open side-menu needs to load UPWARD into the
+     flag's own field per Sven's spec. So we hand the positioning
+     context up one level: main.center-frame becomes position:
+     relative, and .flag-wrap goes position: static. The same
+     absolute descendants now anchor to .center-frame instead --
+     .side-menu with top:0 covers the flag's 200px band exactly;
+     .mesh-banner/.margin-banner with bottom:0 pin to the far end of
+     the panel. .center-frame gets padding-bottom to reserve room
+     for the peek strip so it doesn't overlap the console. ---------- */
+  @media (max-width: 1108px) {
+    main.center-frame {
+      position: relative;
+      padding-bottom: 90px;
+    }
+    .flag-wrap {
+      position: static;
+    }
+
+    /* Peek cards: side by side at the bottom of the panel, filling
+       the width to make prev/next click affordance obvious. Left
+       half is Mesh That Divide (previous in the carousel from k-NET);
+       right half is Just Greens (next). Reset every desktop offset. */
+    .mesh-banner,
+    .margin-banner {
+      position: absolute;
+      top: auto;
+      transform: none;
+      bottom: 12px;
+      width: calc(50% - 18px);
+      z-index: 3;
+    }
+    .mesh-banner  { left: 12px;  right: auto; }
+    .margin-banner { right: 12px; left: auto; }
+    /* Hover lift on desktop uses translateY(calc(-50% - 2px)) because
+       the card starts at translateY(-50%). Mobile card starts at 0,
+       so a plain -2px lift is the right effect. */
+    .mesh-banner:hover,
+    .mesh-banner:focus-visible,
+    .margin-banner:hover,
+    .margin-banner:focus-visible {
+      transform: translateY(-2px);
+    }
+    /* The margin-banner-label is 24px absolute-centered inside the
+       banner; scale it down slightly so it doesn't overwhelm the
+       wider mobile tile relative to the "🌱" glyph. */
+    .margin-banner-label { font-size: 20px; }
+
+    /* Any side-menu currently open loads UPWARD to assume the flag's
+       200px field: top:0 of .center-frame == top of the flag, so
+       height:200px covers the flag zone exactly. Overflow-y auto so
+       long menus scroll inside that band rather than pushing content
+       around. z-index over the flag (which is z-index auto in its
+       stacking context). */
+    .side-menu {
+      top: 0;
+      left: 0;
+      right: 0;
+      width: auto;
+      height: 200px;
+      overflow-y: auto;
+      z-index: 5;
+    }
+    /* Bracket nav (statusbar) is already a horizontal row -- it
+       already reads as a banner-oriented navbar; no changes needed
+       to its layout, only the menu-open behavior above. */
   }
 
   @media (prefers-reduced-motion: reduce) {
