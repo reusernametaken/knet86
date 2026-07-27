@@ -1323,11 +1323,13 @@
       <p>No antenna out here yet, but feel free to try logging in to <strong>kNET 7400</strong> -- password <code>sweetcheese751</code>.</p>
       <p>It's here for local, offline purposes: no internet behind it, just a LAN for testing and tinkering. I'd love some real traffic on it to poke at, so if you're passing through, hop on and see what's reachable.</p>
     ` },
-    rayhunter: { title: `Rayhunter Alert`, body: `
-      <p>k-NET runs a Rayhunter unit (Verizon Orbic RC400L, firmware 0.11.2) watching for IMSI-catcher / stingray behavior on the cell network in and around Kremmling.</p>
-      <p>If you're in town for Middle Park Fair and Rodeo and want a heads-up, subscribe to the <code>knet-rayhunter</code> topic on <a href="https://ntfy.sh/knet-rayhunter" target="_blank" rel="noopener">ntfy.sh</a> (app or web, no account needed) -- you'll get a push notification if the detector flags anything suspicious near the fairgrounds during your visit.</p>
-      <p>Want the raw log files instead -- cell service disruptions, tower handoff weirdness, anything logged during a suspected flyover -- reach out directly and I'll get them to you after the fact.</p>
-      <p class="is-muted"><a href="mailto:ReusernameTaken@2203.fyi">Reach out for logs</a></p>
+    rayhunter: { title: `Rayhunter Alerts`, body: `
+      <p>k-NET operates a Rayhunter detector (Verizon Orbic RC400L, Rayhunter v0.11.2) monitoring cellular network activity in and around Kremmling for patterns associated with IMSI catchers (&ldquo;Stingrays&rdquo;).</p>
+      <p>If you&rsquo;re visiting for the Middle Park Fair &amp; Rodeo&mdash;or simply live nearby&mdash;you can subscribe to the <a href="https://ntfy.sh/FortFagTard" target="_blank" rel="noopener"><code>FortFagTard</code> topic on ntfy.sh</a> (app or web; no account required) to receive an immediate notification whenever the detector records activity matching Rayhunter&rsquo;s published detection criteria.</p>
+      <p>Want to inspect the evidence yourself? Raw log files are available on request, including recorded network events, service anomalies, cell handoffs, and other observations captured during the monitoring period.</p>
+      <p>This project exists to increase transparency around the local radio environment by publishing detector observations and underlying data for independent review.</p>
+      <p class="is-muted">Alerts describe observations made by the detector and do not identify or attribute activity to any particular person, agency, or device.</p>
+      <p><a href="mailto:ReusernameTaken@2203.fyi">Request raw logs &rarr;</a></p>
     ` },
   };
   var DEFAULT_CONTENT = 'blog';
