@@ -776,41 +776,11 @@
      short frame body would leave the strip stranded right under the
      nav instead of at the bottom, with the frame's blank space
      trailing below it. ---------- */
-  .page-strip {
-    margin-top: auto;
-    border-top: 1px solid var(--rule);
-    padding: 16px 0 18px;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: baseline;
-    gap: 18px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .page-strip::-webkit-scrollbar { display: none; }
   /* Assumes exactly 3 stops (mesh / k-net / greens): first stop pinned
      toward the right edge of its column (so it sits close to center,
      not off at the far left), middle stop dead-center, third stop
      pinned toward the left edge of its column. If pages are added
      back later this grid needs revisiting. */
-  .page-strip .stop:nth-child(1) { justify-self: end; }
-  .page-strip .stop:nth-child(2) { justify-self: center; }
-  .page-strip .stop:nth-child(3) { justify-self: start; }
-  .page-strip .stop {
-    font-size: 12px;
-    color: var(--dim);
-    text-decoration: none;
-    white-space: nowrap;
-    border-bottom: 1px solid transparent;
-    padding-bottom: 2px;
-  }
-  .page-strip .stop.is-active {
-    color: var(--glow);
-    border-bottom-color: var(--glow);
-  }
-  .page-strip .stop.is-soon {
-    color: #3a3f47;
-  }
 
   /* ---------- mobile layout (rev 2, per shared 2203.fyi convention):
      the peek cards (Mesh That Divide left / Just Greens right) and
@@ -989,6 +959,13 @@
     background: var(--glow);
     color: var(--bg);
   }
+  .forum-error {
+    color: #f87171;
+    font-size: 13px;
+    border: 1px solid #7f1d1d;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+  }
   .forum-posts { display: flex; flex-direction: column; gap: 12px; }
   .forum-empty { color: var(--dim); font-size: 13px; }
   .forum-post {
@@ -1038,8 +1015,7 @@
 <div class="top-stars" id="topStars" aria-hidden="true"><div class="top-stars-spin" id="topStarsSpin"></div></div>
 <div class="page-shell">
 
-  <div class="frameset-track" id="framesetTrack">
-      <main class="center-frame">
+  <main class="center-frame">
 
         <div class="flag-wrap">
           <div class="flag" id="flagFrame">
@@ -1087,7 +1063,6 @@
           <div class="side-menu" id="menu-expect" hidden>
             <div class="side-menu-header">Expect</div>
             <ul class="list">
-              <li><a href="#" data-content="faq">FAQ</a></li>
               <li>Coming soon&hellip;</li>
               <li>FTP://</li>
             </ul>
@@ -1134,11 +1109,10 @@
           </a>
           </div>
 
-        <nav class="page-strip" id="pageStrip" aria-label="Site pages"></nav>
+        
 
 
       </main>
-  </div>
 
 </div>
 
@@ -1216,19 +1190,6 @@
     var density = 70 / (640 * 200);
     var topCount = Math.round(density * topStarsEl.clientWidth * topStarsEl.clientHeight);
     scatterStars(topStarsSpinEl, topCount);
-  }
-
-  var strip = document.getElementById('pageStrip');
-  PAGES.forEach(function (p) {
-    var el = document.createElement(p.live ? 'a' : 'span');
-    el.className = 'stop' + (p.id === CURRENT_ID ? ' is-active' : '') + (p.live ? '' : ' is-soon');
-    if (p.live) el.href = p.href;
-    el.textContent = p.name;
-    strip.appendChild(el);
-  });
-  var active = strip.querySelector('.is-active');
-  if (active && strip.scrollWidth > strip.clientWidth) {
-    active.scrollIntoView({ inline: 'center', block: 'nearest' });
   }
 
   // ---- left-margin side menus: SHARE / EQUIP / EMPOWER / RECLAIM /
@@ -1316,8 +1277,16 @@
     ` },
     forum: { title: `Forum`, body: `
       <p class="topic-tag">TOPIC: k-NET comms/nodes</p>
-      <p>Open board for anyone passing through -- post with a name or leave it blank.</p>
-      <p>Right now posts save to your own browser only, so you won't see anyone else's yet. Making it actually shared across visitors needs somewhere to store the posts -- that's true of any live board on a static site, not a corner I'm cutting here. Lowest-effort real path is probably GitHub Discussions via giscus, just an embed and a repo setting, no custom backend. Since 86.2203.fyi already runs its own Python server on the Chromebook, a small endpoint there would work too, and fits closer to how the rest of this is built. Say which direction and I'll wire it up.</p>
+      <p>Open board for anyone passing through -- post with a name or leave it blank. Posts are live and shared across all visitors.</p>
+      <div id="forumError" class="forum-error" hidden></div>
+      <form id="forumForm" class="forum-form">
+        <label for="forumName">Name (optional)</label>
+        <input type="text" id="forumName" maxlength="40" placeholder="Anonymous" autocomplete="off">
+        <label for="forumMsg">Message</label>
+        <textarea id="forumMsg" maxlength="500" rows="3" required></textarea>
+        <button type="submit">Post</button>
+      </form>
+      <div id="forumPosts" class="forum-posts"><p class="forum-empty">Loading&hellip;</p></div>
       <form id="forumForm" class="forum-form">
         <label for="forumName">Name (optional)</label>
         <input type="text" id="forumName" maxlength="40" placeholder="Anonymous" autocomplete="off">
@@ -1360,20 +1329,6 @@
       <p>Want the raw log files instead -- cell service disruptions, tower handoff weirdness, anything logged during a suspected flyover -- reach out directly and I'll get them to you after the fact.</p>
       <p class="is-muted"><a href="mailto:ReusernameTaken@2203.fyi">Reach out for logs</a></p>
     ` },
-    faq: { title: `FAQ`, body: `
-      <dl class="faq-list">
-        <dt>Do I need special hardware to use k-NET?</dt>
-        <dd>For the LoRa/MeshCore side, yes -- a MeshCore-compatible radio. For the local WiFi network, just a phone or laptop that can join a WiFi network.</dd>
-        <dt>Is this legal?</dt>
-        <dd>Yes. LoRa mesh radios operate in unlicensed ISM bands, same as a garage door opener or a baby monitor.</dd>
-        <dt>Does this cost anything?</dt>
-        <dd>No subscription, no monthly bill. Hardware is a one-time cost if you want to run your own node; using someone else's node is free.</dd>
-        <dt>How does this connect to Just Greens and Mesh That Divide?</dt>
-        <dd>Same family of projects, same domain (2203.fyi), same underlying idea: community-owned infrastructure over corporate-owned infrastructure. k-NET is the local Kremmling hub, Mesh That Divide is the mountain-to-Front-Range backbone, and Just Greens is a nonprofit produce project that shares the domain and the philosophy.</dd>
-        <dt>Can I just show up and use it?</dt>
-        <dd>Yes -- that's the point. See the Forum and Local WiFi pages.</dd>
-      </dl>
-    ` }
   };
   var DEFAULT_CONTENT = 'blog';
 
@@ -1385,36 +1340,35 @@
     if (key === 'forum') initForum();
   }
 
-  // ---- forum: simple client-side board. No backend on a static
-  // GitHub Pages site, so posts live in this browser's localStorage
-  // only -- clearly said so in the page copy above. Delegated init
-  // (called from renderContent, not once at load) since the form
-  // doesn't exist in the DOM until the Forum stub is actually shown.
+  // ---- forum: real shared board served by the Python endpoint on
+  //      the Chromebook (same host as 86.2203.fyi, port 8086).
+  //      Delegated init so the DOM exists before we wire up events.
+  var FORUM_API = 'https://86.2203.fyi/forum';
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   function initForum() {
-    var KEY = 'knetForumPosts';
-    var form = document.getElementById('forumForm');
-    var list = document.getElementById('forumPosts');
+    var form  = document.getElementById('forumForm');
+    var list  = document.getElementById('forumPosts');
+    var errEl = document.getElementById('forumError');
     if (!form || !list) return;
 
-    function load() {
-      try { return JSON.parse(localStorage.getItem(KEY)) || []; }
-      catch (e) { return []; }
+    function showErr(msg) {
+      errEl.textContent = msg;
+      errEl.hidden = false;
     }
-    function save(posts) {
-      try { localStorage.setItem(KEY, JSON.stringify(posts)); } catch (e) {}
-    }
-    function escapeHtml(s) {
-      return s.replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    }
-    function render() {
-      var posts = load();
+    function clearErr() { errEl.hidden = true; errEl.textContent = ''; }
+
+    function renderPosts(posts) {
       if (!posts.length) {
         list.innerHTML = '<p class="forum-empty">No posts yet -- be the first.</p>';
         return;
       }
-      list.innerHTML = posts.slice().reverse().map(function (p) {
+      list.innerHTML = posts.map(function (p) {
         var name = p.name ? escapeHtml(p.name) : 'Anonymous';
         var when = new Date(p.ts).toLocaleString();
         return '<div class="forum-post"><div class="forum-post-head">' +
@@ -1424,20 +1378,33 @@
       }).join('');
     }
 
+    function loadPosts() {
+      fetch(FORUM_API + '/posts')
+        .then(function (r) { return r.json(); })
+        .then(function (data) { clearErr(); renderPosts(data.posts || []); })
+        .catch(function () { showErr('Could not reach the forum server -- try again shortly.'); });
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var nameEl = document.getElementById('forumName');
-      var msgEl = document.getElementById('forumMsg');
-      var msg = msgEl.value.trim();
+      var name = document.getElementById('forumName').value.trim();
+      var msg  = document.getElementById('forumMsg').value.trim();
       if (!msg) return;
-      var posts = load();
-      posts.push({ name: nameEl.value.trim(), msg: msg, ts: Date.now() });
-      save(posts);
-      msgEl.value = '';
-      render();
+      fetch(FORUM_API + '/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, msg: msg })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function () {
+          document.getElementById('forumMsg').value = '';
+          clearErr();
+          loadPosts();
+        })
+        .catch(function () { showErr('Post failed -- server may be sleeping. Try again.'); });
     });
 
-    render();
+    loadPosts();
   }
 
   document.querySelectorAll('.side-menu a[data-content]').forEach(function (link) {
