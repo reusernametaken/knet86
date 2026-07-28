@@ -1287,14 +1287,6 @@
         <button type="submit">Post</button>
       </form>
       <div id="forumPosts" class="forum-posts"><p class="forum-empty">Loading&hellip;</p></div>
-      <form id="forumForm" class="forum-form">
-        <label for="forumName">Name (optional)</label>
-        <input type="text" id="forumName" maxlength="40" placeholder="Anonymous" autocomplete="off">
-        <label for="forumMsg">Message</label>
-        <textarea id="forumMsg" maxlength="500" rows="3" required></textarea>
-        <button type="submit">Post</button>
-      </form>
-      <div id="forumPosts" class="forum-posts"></div>
     ` },
     philosophy: { title: `Philosophy?`, body: `
       <p>Affordable technology is sitting right at our fingertips now -- radios, single-board computers, solar panels, secondhand routers -- the kind of hardware that used to require a company or a government behind it to deploy at any scale. It doesn't anymore.</p>
@@ -1342,10 +1334,10 @@
     if (key === 'forum') initForum();
   }
 
-  // ---- forum: real shared board served by the Python endpoint on
-  //      the Chromebook (same host as 86.2203.fyi, port 8086).
+  // ---- forum: real shared board served by a Val Town HTTP val
+  //      (SQLite-backed, replaces the old Chromebook Python server).
   //      Delegated init so the DOM exists before we wire up events.
-  var FORUM_API = 'https://86.2203.fyi/forum';
+  var FORUM_API = 'https://reusernametaken--57602fc08abc11f19ef11607ee4eb77e.web.val.run/forum';
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
